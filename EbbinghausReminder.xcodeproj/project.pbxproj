@@ -21,7 +21,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B123D5F02DEEA89600DCFCCB /* EbbinghausReminder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EbbinghausReminder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B123D5F02DEEA89600DCFCCB /* EbbinghausReminder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = EbbinghausReminder.app; path = "/Users/izumisan/Documents/37imuzi/EbbinghausReminder/build/Debug-iphoneos/EbbinghausReminder.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -61,7 +61,6 @@
 			isa = PBXGroup;
 			children = (
 				B12235912D52A29700320184 /* EbbinghausReminder */,
-				B123D5F02DEEA89600DCFCCB /* EbbinghausReminder.app */,
 			);
 			sourceTree = "<group>";
 		};

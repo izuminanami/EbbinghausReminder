@@ -7,7 +7,6 @@
 
 import Foundation
 import UserNotifications
-import WidgetKit
 
 class TaskManager: ObservableObject {
     @Published var tasks: [Task] = []
@@ -59,7 +58,6 @@ class TaskManager: ObservableObject {
             }
 
             saveTasks()
-            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 
