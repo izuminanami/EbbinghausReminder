@@ -10,16 +10,6 @@
 		B1DC0CB82DC3527000BF405C /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = B1DC0CB72DC3527000BF405C /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		B122361F2D53580200320184 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B12235872D52A29700320184 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B12235CE2D52ADCC00320184;
-			remoteInfo = EbbinghausReminderWidgetExtension;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		B123D5F02DEEA89600DCFCCB /* EbbinghausReminder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = EbbinghausReminder.app; path = "/Users/izumisan/Documents/37imuzi/EbbinghausReminder/build/Debug-iphoneos/EbbinghausReminder.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -78,7 +68,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				B12236202D53580200320184 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				B12235912D52A29700320184 /* EbbinghausReminder */,
@@ -147,13 +136,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		B12236202D53580200320184 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			targetProxy = B122361F2D53580200320184 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B122359B2D52A29800320184 /* Debug */ = {
@@ -279,10 +261,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = PrimaryColor;
 				CODE_SIGN_ENTITLEMENTS = EbbinghausReminder/EbbinghausReminder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"EbbinghausReminder/Preview Content\"";
 				DEVELOPMENT_TEAM = GBVLR8PRV8;
 				ENABLE_PREVIEWS = YES;
@@ -300,7 +283,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -317,10 +300,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = PrimaryColor;
 				CODE_SIGN_ENTITLEMENTS = EbbinghausReminder/EbbinghausReminder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"EbbinghausReminder/Preview Content\"";
 				DEVELOPMENT_TEAM = GBVLR8PRV8;
 				ENABLE_PREVIEWS = YES;
@@ -338,7 +322,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;

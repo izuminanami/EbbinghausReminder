@@ -1,148 +1,171 @@
-//
-//  TaskExecutionView.swift
-//  EbbinghausReminder
-//
-//  Created by 泉七海 on 2025/02/05.
-//
-
 import SwiftUI
 
 struct TaskExecutionView: View {
-    @EnvironmentObject var taskManager: TaskManager
+    @EnvironmentObject private var taskManager: TaskManager
+    @AppStorage("taskSortOption") private var sortOptionRawValue = TaskSortOption.scheduledDate.rawValue
+
     @State private var isShowingCompleted = false
     @State private var isAddingTask = false
+    @State private var editingTask: Task?
 
     var body: some View {
         ZStack {
-            VStack {
-                Spacer()
-                    .frame(height: 10)
-                HStack {
-                    // テキストをタップすると実行済・実行中が切り替わる
-                    Text(isShowingCompleted ? "実行済のタスク" : "実行中のタスク")
-                        .font(.title)
-                        .bold()
-                        .foregroundColor(Color("PrimaryColor"))
-                        .padding()
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isShowingCompleted.toggle() // クリックで切り替え
-                            }
-                        }
-                    Image(systemName: isShowingCompleted ? "chevron.up" : "chevron.down") // アイコンで切り替えを表現
-                        .foregroundColor(Color("PrimaryColor"))
-                        .font(.title2)
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isShowingCompleted.toggle()
-                            }
-                        }
-                    Spacer()
-                    Button(action: { withAnimation { isAddingTask = true } }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(Color("PrimaryColor"))
-                    }
-                }
-                .padding()
-                
+            VStack(spacing: 0) {
+                header
+                sortPicker
+
                 if displayedTasks.isEmpty {
-                    // タスクがないときのメッセージを表示
                     Spacer()
                     Text(isShowingCompleted ? "実行済のタスクはありません" : "実行中のタスクはありません")
                         .foregroundColor(Color("GrayTextColor"))
-                        .padding()
                     Spacer()
-                        .frame(height: UIScreen.main.bounds.size.height/3)
                 } else {
-                    List {
-                        ForEach(displayedTasks) { task in
-                            HStack {
-                                Text(task.title)
-                                    .foregroundColor(Color("TextColor"))
-                                Spacer()
-                                Text(formattedDate(task.scheduledDate))
-                                    .foregroundColor(Color("GrayTextColor"))
-                                Spacer()
-                                    .frame(width: 10)
-                                Text("\(task.completionCount + 1)回目")
-                                    .foregroundColor(Color("GrayTextColor"))
-                            }
-                            .padding()
-                            .background(Color("CardBackground"))
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteTask(task)
-                                } label: {
-                                    Label("削除", systemImage: "trash")
-                                }
-                                .tint(Color("DeleteColor"))
-                            }
-                        }
-                        .listRowBackground(Color("BackgroundColor")) // 各行の背景を統一
-                    }
-                    .scrollContentBackground(.hidden) // List のデフォルト背景を削除
-                    .background(Color("BackgroundColor")) // List の背景も統一
+                    taskList
                 }
             }
-            .onTapGesture { hideKeyboard() }
-            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
-            
-            if isAddingTask {
-                Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture { withAnimation { isAddingTask = false } }
+            .background(Color("BackgroundColor").ignoresSafeArea())
 
+            if isAddingTask || editingTask != nil {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation {
+                            isAddingTask = false
+                            editingTask = nil
+                        }
+                    }
+            }
+
+            if isAddingTask {
                 TaskAddPopupView(isShowing: $isAddingTask)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+
+            if let task = editingTask {
+                TaskEditPopupView(task: task, isShowing: editingTaskBinding)
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
     }
 
-    private var displayedTasks: [Task] {
-        return isShowingCompleted ? taskManager.completedTasks : taskManager.tasks
-    }
-
-    private func deleteTask(_ task: Task) {
-        if isShowingCompleted {
-            if let index = taskManager.completedTasks.firstIndex(where: { $0.id == task.id }) {
-                taskManager.completedTasks.remove(at: index)
+    private var header: some View {
+        HStack(spacing: 14) {
+            Menu {
+                Button {
+                    withAnimation { isShowingCompleted = false }
+                } label: {
+                    Label("実行中", systemImage: "list.bullet")
+                }
+                Button {
+                    withAnimation { isShowingCompleted = true }
+                } label: {
+                    Label("実行済", systemImage: "checkmark.circle")
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Text(isShowingCompleted ? "実行済のタスク" : "実行中のタスク")
+                        .font(.title2.bold())
+                    Image(systemName: "chevron.down")
+                        .font(.subheadline.bold())
+                }
+                .foregroundColor(Color("PrimaryColor"))
             }
-        } else {
-            if let index = taskManager.tasks.firstIndex(where: { $0.id == task.id }) {
-                taskManager.tasks.remove(at: index)
+
+            Spacer()
+
+            Button { withAnimation { isAddingTask = true } } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(Color("PrimaryColor"))
             }
         }
-        taskManager.saveTasks()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    private var sortPicker: some View {
+        HStack {
+            Text("\(displayedTasks.count)件")
+                .font(.subheadline)
+                .foregroundColor(Color("GrayTextColor"))
+            Spacer()
+            Menu {
+                Picker("並び順", selection: $sortOptionRawValue) {
+                    ForEach(TaskSortOption.allCases) { option in
+                        Text(option.displayName).tag(option.rawValue)
+                    }
+                }
+            } label: {
+                Label(sortOption.displayName, systemImage: "arrow.up.arrow.down")
+                    .font(.subheadline)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
     }
-    
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy/MM/dd"
-        return formatter.string(from: date)
+
+    private var taskList: some View {
+        List {
+            ForEach(displayedTasks) { task in
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(task.title)
+                            .foregroundColor(Color("TextColor"))
+                        Text(task.scheduledDate, format: .dateTime.year().month().day())
+                            .font(.caption)
+                            .foregroundColor(Color("GrayTextColor"))
+                    }
+                    Spacer()
+                    Text(isShowingCompleted ? "完了" : "\(task.completionCount + 1)回目")
+                        .font(.subheadline)
+                        .foregroundColor(Color("GrayTextColor"))
+                }
+                .padding(.vertical, 8)
+                .listRowBackground(Color("CardBackground"))
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    if !isShowingCompleted {
+                        Button {
+                            editingTask = task
+                        } label: {
+                            Label("編集", systemImage: "pencil")
+                        }
+                        .tint(Color("PrimaryColor"))
+                    }
+                }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        taskManager.deleteTask(task)
+                    } label: {
+                        Label("削除", systemImage: "trash")
+                    }
+                    .tint(Color("DeleteColor"))
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color("BackgroundColor"))
+        .listStyle(.insetGrouped)
+    }
+
+    private var displayedTasks: [Task] {
+        sortOption.sorted(isShowingCompleted ? taskManager.completedTasks : taskManager.tasks)
+    }
+
+    private var sortOption: TaskSortOption {
+        TaskSortOption(rawValue: sortOptionRawValue) ?? .scheduledDate
+    }
+
+    private var editingTaskBinding: Binding<Bool> {
+        Binding(
+            get: { editingTask != nil },
+            set: { if !$0 { editingTask = nil } }
+        )
     }
 }
 
-// プレビュー
-struct TaskExecutionView_Previews: PreviewProvider {
-    static var previews: some View {
-        let taskManager = TaskManager()
-        
-        taskManager.tasks = [
-            Task(id: UUID(), title: "プログラミングの復習", stage: .oneHourLater, createdAt: Date(), scheduledDate: Date(), completionCount: 1),
-            Task(id: UUID(), title: "アプリデザインの改善", stage: .oneHourLater, createdAt: Date(), scheduledDate: Date(), completionCount: 2)
-        ]
-        
-        return TaskExecutionView()
-            .environmentObject(taskManager)
-            .previewLayout(.sizeThatFits)
-            .background(Color("BackgroundColor"))
-    }
+#Preview {
+    TaskExecutionView()
+        .environmentObject(TaskManager())
 }

@@ -9,21 +9,17 @@ import SwiftUI
 import GoogleMobileAds
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    
     func application(_ application: UIApplication,
       didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
-        // AdMob (12.2.0)で動作
         MobileAds.shared.start(completionHandler: nil)
-        // GADMobileAds.sharedInstance().start(completionHandler: nil)
         return true
     }
-    
 }
 
 @main
 struct EbbinghausReminderApp: App {
-    @StateObject var taskManager = TaskManager()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var taskManager = TaskManager()
 
     init() {
         // タブバーのデザインを変更
@@ -34,24 +30,68 @@ struct EbbinghausReminderApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TabView {
-                TodayTaskView()
-                    .tabItem {
-                        Label("今日のタスク", systemImage: "calendar")
-                    }
-                TaskExecutionView()
-                    .tabItem {
-                        Label("実行中", systemImage: "list.bullet")
-                    }
-                TaskCalendarView()
-                    .tabItem {
-                        Label("カレンダー", systemImage: "calendar.circle")
-                    }
+            AppRootView()
+                .environmentObject(taskManager)
+        }
+    }
+}
+
+private struct AppRootView: View {
+    @EnvironmentObject private var taskManager: TaskManager
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var isShowingOnboarding = false
+    @State private var didEvaluateOnboarding = false
+
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                TabView {
+                    TodayTaskView()
+                        .tabItem {
+                            Label("今日のタスク", systemImage: "calendar")
+                        }
+                    TaskExecutionView()
+                        .tabItem {
+                            Label("実行中", systemImage: "list.bullet")
+                        }
+                    TaskCalendarView()
+                        .tabItem {
+                            Label("カレンダー", systemImage: "calendar.circle")
+                        }
+                }
+
+                if didEvaluateOnboarding && !isShowingOnboarding {
+                    Divider()
+                    AdMobBannerView(width: geometry.size.width)
+                        .padding(.top, 4)
+                }
             }
-            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+        }
+        .background(Color("BackgroundColor").ignoresSafeArea())
+        .fullScreenCover(isPresented: $isShowingOnboarding) {
+            OnboardingView {
+                hasCompletedOnboarding = true
+                isShowingOnboarding = false
+            }
             .environmentObject(taskManager)
-            AdMobBannerView()
-            .frame(width: 320, height: 50)
+            .interactiveDismissDisabled()
+        }
+        .onAppear(perform: evaluateOnboarding)
+    }
+
+    private func evaluateOnboarding() {
+        guard !didEvaluateOnboarding else { return }
+        didEvaluateOnboarding = true
+
+        let defaults = UserDefaults.standard
+        let onboardingWasEvaluated = defaults.object(forKey: "hasCompletedOnboarding") != nil
+        let hasExistingData = defaults.data(forKey: "tasks") != nil
+            || defaults.data(forKey: "completedTasks") != nil
+
+        if !onboardingWasEvaluated && hasExistingData {
+            hasCompletedOnboarding = true
+        } else {
+            isShowingOnboarding = !hasCompletedOnboarding
         }
     }
 }

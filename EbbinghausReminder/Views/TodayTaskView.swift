@@ -1,142 +1,235 @@
-//
-//  TodayTaskView.swift
-//  EbbinghausReminder
-//
-//  Created by 泉七海 on 2025/02/05.
-//
-
 import SwiftUI
 
 struct TodayTaskView: View {
-    @EnvironmentObject var taskManager: TaskManager
+    @EnvironmentObject private var taskManager: TaskManager
+    @AppStorage("taskSortOption") private var sortOptionRawValue = TaskSortOption.scheduledDate.rawValue
+
     @State private var isAddingTask = false
-    @State private var isShowingInfo = false // InfoView のポップアップ管理
-    @State private var completedTasks: Set<UUID> = [] // タスクごとの完了状態を管理
+    @State private var isShowingInfo = false
+    @State private var isShowingSettings = false
+    @State private var editingTask: Task?
+    @State private var completingTaskIDs: Set<UUID> = []
 
     var body: some View {
         ZStack {
-            VStack {
-                Spacer().frame(height: 10)
-                HStack {
-                    Text("今日のタスク")
-                        .font(.title)
-                        .bold()
-                        .foregroundColor(Color("PrimaryColor"))
-                        .padding()
-                    Spacer()
-                    Button(action: { withAnimation { isShowingInfo = true } }) {
-                        Image(systemName: "info.circle")
-                            .font(.title)
-                            .foregroundColor(Color("PrimaryColor"))
-                    }
-                    Button(action: { withAnimation { isAddingTask = true } }) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(Color("PrimaryColor"))
-                    }
-                }
-                .padding()
+            VStack(spacing: 0) {
+                header
+                sortPicker
 
-                if todayTasks.isEmpty {
+                if overdueTasks.isEmpty && todayTasks.isEmpty {
                     Spacer()
-                    Text("今日のタスクはありません")
-                        .foregroundColor(Color("GrayTextColor"))
-                        .padding()
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 44))
+                            .foregroundColor(Color("PrimaryColor"))
+                        Text("今日の復習はありません")
+                            .foregroundColor(Color("GrayTextColor"))
+                    }
                     Spacer()
-                        .frame(height: UIScreen.main.bounds.size.height/3)
                 } else {
-                    List {
-                        ForEach(todayTasks) { task in
-                            HStack {
-                                Text(task.title)
-                                    .foregroundColor(Color("TextColor"))
-                                Spacer()
-                                Text("\(task.completionCount + 1)回目")
-                                    .foregroundColor(Color("GrayTextColor"))
-
-                                // 押したら即チェックマークがつくボタン
-                                Button(action: {
-                                        completedTasks.insert(task.id) // 即座にチェックマークをつける
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // 1秒後に処理
-                                        withAnimation(.easeInOut(duration: 0.3)) {
-                                            taskManager.completeTask(task) // 1秒後にタスク完了処理
-                                        }
-                                    }
-                                }) {
-                                    Image(systemName: completedTasks.contains(task.id) ? "checkmark.circle.fill" : "circle") // チェックを即反映
-                                        .font(.title2)
-                                        .foregroundColor(completedTasks.contains(task.id) ? Color.green : Color("PrimaryColor"))
-                                        .transition(.scale) // スムーズな変化
-                                }
-                            }
-                            .padding()
-                            .background(Color("CardBackground"))
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
-                            .transition(.move(edge: .trailing).combined(with: .opacity)) // スライド＆フェードアウト
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) { taskManager.deleteTask(task) } label: {
-                                    Label("削除", systemImage: "trash")
-                                }
-                                .tint(Color("DeleteColor"))
-                            }
-                        }
-                        .listRowBackground(Color("BackgroundColor")) // 各行の背景を統一
-                    }
-                    .scrollContentBackground(.hidden) // List のデフォルト背景を削除
-                    .background(Color("BackgroundColor")) // List の背景も統一
+                    taskList
                 }
             }
-            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("BackgroundColor").ignoresSafeArea())
 
-            // ポップアップの背景（フェード表示）
-            if isAddingTask || isShowingInfo {
+            if isPresentingPopup {
                 Color.black.opacity(0.3)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        withAnimation {
-                            isAddingTask = false
-                            isShowingInfo = false
-                        }
-                    }
+                    .ignoresSafeArea()
+                    .onTapGesture { closePopups() }
             }
-            // 「タスク追加」ポップアップ
+
             if isAddingTask {
                 TaskAddPopupView(isShowing: $isAddingTask)
                     .transition(.opacity)
                     .zIndex(1)
             }
-            // 「インフォメーション」ポップアップ
+
             if isShowingInfo {
                 InfoView(isShowing: $isShowingInfo)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+
+            if isShowingSettings {
+                SettingsView(isShowing: $isShowingSettings)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+
+            if let task = editingTask {
+                TaskEditPopupView(task: task, isShowing: editingTaskBinding)
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
     }
 
-    // 前日以前の未完了タスクも表示
+    private var header: some View {
+        HStack(spacing: 16) {
+            Text("今日のタスク")
+                .font(.title2.bold())
+                .foregroundColor(Color("PrimaryColor"))
+            Spacer()
+            Button { withAnimation { isShowingInfo = true } } label: {
+                Image(systemName: "info.circle")
+            }
+            Button { withAnimation { isShowingSettings = true } } label: {
+                Image(systemName: "gearshape")
+            }
+            Button { withAnimation { isAddingTask = true } } label: {
+                Image(systemName: "plus.circle.fill")
+            }
+        }
+        .font(.title2)
+        .foregroundColor(Color("PrimaryColor"))
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+    }
+
+    private var sortPicker: some View {
+        HStack {
+            if !overdueTasks.isEmpty {
+                Label("期限切れ \(overdueTasks.count)件", systemImage: "exclamationmark.circle.fill")
+                    .font(.subheadline.bold())
+                    .foregroundColor(Color("DeleteColor"))
+            }
+            Spacer()
+            Menu {
+                Picker("並び順", selection: $sortOptionRawValue) {
+                    ForEach(TaskSortOption.allCases) { option in
+                        Text(option.displayName).tag(option.rawValue)
+                    }
+                }
+            } label: {
+                Label(sortOption.displayName, systemImage: "arrow.up.arrow.down")
+                    .font(.subheadline)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
+    }
+
+    private var taskList: some View {
+        List {
+            if !overdueTasks.isEmpty {
+                Section("期限切れ") {
+                    ForEach(overdueTasks) { task in
+                        taskRow(task, isOverdue: true)
+                    }
+                }
+            }
+
+            if !todayTasks.isEmpty {
+                Section("今日") {
+                    ForEach(todayTasks) { task in
+                        taskRow(task, isOverdue: false)
+                    }
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color("BackgroundColor"))
+        .listStyle(.insetGrouped)
+    }
+
+    private func taskRow(_ task: Task, isOverdue: Bool) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(task.title)
+                    .foregroundColor(Color("TextColor"))
+                if isOverdue {
+                    Text(task.scheduledDate, format: .dateTime.month().day())
+                        .font(.caption)
+                        .foregroundColor(Color("DeleteColor"))
+                }
+            }
+            Spacer()
+            Text("\(task.completionCount + 1)回目")
+                .font(.subheadline)
+                .foregroundColor(Color("GrayTextColor"))
+
+            Button {
+                complete(task)
+            } label: {
+                Image(systemName: completingTaskIDs.contains(task.id) ? "checkmark.circle.fill" : "circle")
+                    .font(.title2)
+                    .foregroundColor(
+                        completingTaskIDs.contains(task.id) ? .green : Color("PrimaryColor")
+                    )
+            }
+            .buttonStyle(.borderless)
+            .disabled(completingTaskIDs.contains(task.id))
+        }
+        .padding(.vertical, 8)
+        .listRowBackground(Color("CardBackground"))
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button {
+                editingTask = task
+            } label: {
+                Label("編集", systemImage: "pencil")
+            }
+            .tint(Color("PrimaryColor"))
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                taskManager.deleteTask(task)
+            } label: {
+                Label("削除", systemImage: "trash")
+            }
+            .tint(Color("DeleteColor"))
+        }
+    }
+
+    private var overdueTasks: [Task] {
+        let startOfToday = Calendar.current.startOfDay(for: Date())
+        return sortOption.sorted(taskManager.tasks.filter {
+            $0.scheduledDate < startOfToday
+        })
+    }
+
     private var todayTasks: [Task] {
-        let today = Calendar.current.startOfDay(for: Date())
-        return taskManager.tasks.filter { task in
-            let taskDate = Calendar.current.startOfDay(for: task.scheduledDate)
-            return taskDate <= today
+        sortOption.sorted(taskManager.tasks.filter {
+            Calendar.current.isDateInToday($0.scheduledDate)
+        })
+    }
+
+    private var sortOption: TaskSortOption {
+        TaskSortOption(rawValue: sortOptionRawValue) ?? .scheduledDate
+    }
+
+    private var isPresentingPopup: Bool {
+        isAddingTask || isShowingInfo || isShowingSettings || editingTask != nil
+    }
+
+    private var editingTaskBinding: Binding<Bool> {
+        Binding(
+            get: { editingTask != nil },
+            set: { if !$0 { editingTask = nil } }
+        )
+    }
+
+    private func complete(_ task: Task) {
+        guard !completingTaskIDs.contains(task.id) else { return }
+        completingTaskIDs.insert(task.id)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                taskManager.completeTask(task)
+                completingTaskIDs.remove(task.id)
+            }
+        }
+    }
+
+    private func closePopups() {
+        withAnimation {
+            isAddingTask = false
+            isShowingInfo = false
+            isShowingSettings = false
+            editingTask = nil
         }
     }
 }
 
-// プレビュー
-struct TodayTaskView_Previews: PreviewProvider {
-    static var previews: some View {
-        let taskManager = TaskManager()
-        
-        taskManager.tasks = [
-            Task(id: UUID(), title: "数学の復習", stage: .oneHourLater, createdAt: Date(), scheduledDate: Date(), completionCount: 1),
-            Task(id: UUID(), title: "英単語テスト", stage: .oneHourLater, createdAt: Date(), scheduledDate: Date(), completionCount: 2)
-        ]
-        
-        return TodayTaskView()
-            .environmentObject(taskManager)
-            .previewLayout(.sizeThatFits)
-    }
+#Preview {
+    TodayTaskView()
+        .environmentObject(TaskManager())
 }

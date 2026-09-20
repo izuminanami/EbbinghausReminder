@@ -48,9 +48,10 @@ struct InfoView: View {
                     
                     SectionHeader(title: "⚙️  便利な機能")
                     VStack(alignment: .leading, spacing: 10) {
-                        InfoRow(icon: "hand.tap", text: "タスクをスワイプで削除")
-                        InfoRow(icon: "calendar", text: "カレンダーで復習スケジュールを確認")
-                        InfoRow(icon: "bell", text: "リマインダー通知で忘れずに復習")
+                        InfoRow(icon: "hand.tap", text: "左スワイプで削除、右スワイプで編集")
+                        InfoRow(icon: "arrow.up.arrow.down", text: "復習日・登録日・名前で並べ替え")
+                        InfoRow(icon: "calendar", text: "予定マーク付きカレンダーで日程を確認")
+                        InfoRow(icon: "bell", text: "歯車ボタンから通知時刻を変更")
                         InfoRow(icon: "paintbrush", text: "ダークモード対応")
                     }
                     .padding(.horizontal)

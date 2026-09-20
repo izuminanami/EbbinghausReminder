@@ -11,7 +11,12 @@ struct TaskAddPopupView: View {
     @EnvironmentObject var taskManager: TaskManager
     @Binding var isShowing: Bool
     @State private var taskTitle = ""
-    @State private var taskDate = Date() // 選択された日付を格納
+    @State private var taskDate: Date
+
+    init(isShowing: Binding<Bool>, initialDate: Date = Date()) {
+        _isShowing = isShowing
+        _taskDate = State(initialValue: initialDate)
+    }
 
     var body: some View {
         VStack {
@@ -24,7 +29,7 @@ struct TaskAddPopupView: View {
             // モダンなテキストフィールドデザイン
             TextField("タスク名を入力...", text: $taskTitle)
                 .padding()
-                .background(Color("TextFieldBackground").opacity(0.9))
+                .background(Color("BackgroundColor").opacity(0.9))
                 .cornerRadius(10)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
@@ -34,14 +39,22 @@ struct TaskAddPopupView: View {
                 .padding(.horizontal, 20)
                 .onSubmit { addTask() } // エンターキーでタスク追加可能に
 
-            VStack {
-                DatePicker("", selection: $taskDate, displayedComponents: .date)
+            VStack(alignment: .leading, spacing: 8) {
+                Label("最初に復習する日", systemImage: "calendar")
+                    .font(.headline)
+                    .foregroundColor(Color("TextColor"))
+
+                DatePicker("最初に復習する日", selection: $taskDate, displayedComponents: .date)
                     .datePickerStyle(WheelDatePickerStyle())
                     .labelsHidden()
                     .background(Color("CardBackground"))
                     .cornerRadius(8)
+
+                Text("通知は設定した時刻に届きます")
+                    .font(.caption)
+                    .foregroundColor(Color("GrayTextColor"))
             }
-            .padding()
+            .padding(.horizontal, 20)
 
             HStack {
                 Button("キャンセル") {
@@ -56,7 +69,7 @@ struct TaskAddPopupView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Color("PrimaryColor"))
                 .padding()
-                .disabled(taskTitle.isEmpty) // タスク名が空ならボタンを無効化
+                .disabled(taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .frame(width: 320)
@@ -69,8 +82,9 @@ struct TaskAddPopupView: View {
     }
 
     private func addTask() {
-        guard !taskTitle.isEmpty else { return }
-        taskManager.addTask(title: taskTitle, date: taskDate) // 選択した日付を反映
+        let trimmedTitle = taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTitle.isEmpty else { return }
+        taskManager.addTask(title: trimmedTitle, date: taskDate)
         withAnimation { isShowing = false }
         taskTitle = "" // フォームをリセット
     }
