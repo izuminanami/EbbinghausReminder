@@ -41,26 +41,30 @@ private struct AppRootView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var isShowingOnboarding = false
     @State private var didEvaluateOnboarding = false
+    @State private var selectedTab = Self.initialTab
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                TabView {
+                TabView(selection: $selectedTab) {
                     TodayTaskView()
+                        .tag(0)
                         .tabItem {
                             Label("今日のタスク", systemImage: "calendar")
                         }
                     TaskExecutionView()
+                        .tag(1)
                         .tabItem {
                             Label("実行中", systemImage: "list.bullet")
                         }
                     TaskCalendarView()
+                        .tag(2)
                         .tabItem {
                             Label("カレンダー", systemImage: "calendar.circle")
                         }
                 }
 
-                if didEvaluateOnboarding && !isShowingOnboarding {
+                if didEvaluateOnboarding && !isShowingOnboarding && !Self.isStoreScreenshotMode {
                     Divider()
                     AdMobBannerView(width: geometry.size.width)
                         .padding(.top, 4)
@@ -83,6 +87,11 @@ private struct AppRootView: View {
         guard !didEvaluateOnboarding else { return }
         didEvaluateOnboarding = true
 
+        if Self.isStoreScreenshotMode {
+            isShowingOnboarding = false
+            return
+        }
+
         let defaults = UserDefaults.standard
         let onboardingWasEvaluated = defaults.object(forKey: "hasCompletedOnboarding") != nil
         let hasExistingData = defaults.data(forKey: "tasks") != nil
@@ -93,5 +102,21 @@ private struct AppRootView: View {
         } else {
             isShowingOnboarding = !hasCompletedOnboarding
         }
+    }
+
+    private static var isStoreScreenshotMode: Bool {
+        #if DEBUG
+        StoreScreenshotConfiguration.isEnabled
+        #else
+        false
+        #endif
+    }
+
+    private static var initialTab: Int {
+        #if DEBUG
+        StoreScreenshotConfiguration.selectedTab
+        #else
+        0
+        #endif
     }
 }

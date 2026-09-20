@@ -16,6 +16,14 @@ final class TaskManager: ObservableObject {
         let defaults = UserDefaults.standard
         notificationHour = defaults.object(forKey: notificationHourKey) as? Int ?? 20
         notificationMinute = defaults.object(forKey: notificationMinuteKey) as? Int ?? 0
+
+        #if DEBUG
+        if StoreScreenshotConfiguration.isEnabled {
+            tasks = StoreScreenshotConfiguration.tasks()
+            return
+        }
+        #endif
+
         loadTasks()
     }
 
