@@ -77,7 +77,6 @@ struct TaskAddPopupView: View {
         .background(Color("CardBackground"))
         .cornerRadius(12)
         .shadow(radius: 10)
-        .onTapGesture { hideKeyboard() }
         .transition(.opacity) // フェードイン・フェードアウト
     }
 
@@ -87,10 +86,6 @@ struct TaskAddPopupView: View {
         taskManager.addTask(title: trimmedTitle, date: taskDate)
         withAnimation { isShowing = false }
         taskTitle = "" // フォームをリセット
-    }
-
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

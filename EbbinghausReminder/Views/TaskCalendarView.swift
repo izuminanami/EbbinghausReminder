@@ -52,6 +52,7 @@ struct TaskCalendarView: View {
                     .zIndex(1)
             }
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 
     private var header: some View {
