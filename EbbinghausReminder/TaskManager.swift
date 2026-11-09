@@ -214,6 +214,7 @@ final class TaskManager: ObservableObject {
         if let completedTasksData = try? encoder.encode(completedTasks) {
             UserDefaults.standard.set(completedTasksData, forKey: completedTasksKey)
         }
+        WidgetSnapshotStore.saveTasks(tasks)
     }
 
     private func loadTasks() {
@@ -226,5 +227,6 @@ final class TaskManager: ObservableObject {
            let savedCompletedTasks = try? decoder.decode([Task].self, from: completedTasksData) {
             completedTasks = savedCompletedTasks
         }
+        WidgetSnapshotStore.saveTasks(tasks)
     }
 }

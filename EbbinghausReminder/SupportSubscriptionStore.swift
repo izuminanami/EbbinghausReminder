@@ -112,6 +112,7 @@ final class SupportSubscriptionStore: ObservableObject {
 
         isSubscribed = hasActiveSubscription
         hasCheckedEntitlement = true
+        WidgetSnapshotStore.saveSubscriptionStatus(isSubscribed: hasActiveSubscription)
     }
 
     private func observeTransactionUpdates() -> _Concurrency.Task<Void, Never> {

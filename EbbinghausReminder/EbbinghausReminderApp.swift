@@ -88,6 +88,10 @@ private struct AppRootView: View {
             .interactiveDismissDisabled()
         }
         .onAppear(perform: evaluateOnboarding)
+        .onOpenURL { url in
+            guard url.scheme == "ebbinghausreminder" else { return }
+            selectedTab = 0
+        }
         .task {
             await subscriptionStore.prepare()
         }

@@ -6,6 +6,17 @@
 	<array>
 		<string>ja</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>-7imuzi.EbbinghausReminder</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ebbinghausreminder</string>
+			</array>
+		</dict>
+	</array>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3453173920554262~3868075357</string>
 	<key>SKAdNetworkItems</key>

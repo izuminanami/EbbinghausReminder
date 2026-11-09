@@ -18,13 +18,14 @@ struct SupportDeveloperView: View {
                         Text("開発者を支援")
                             .font(.title.bold())
                             .foregroundColor(Color("TextColor"))
-                        Text("広告を削除して、これからの改善と運営を支援できます。")
+                        Text("広告を削除して、今日の復習ウィジェットを利用できます。")
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color("GrayTextColor"))
                     }
 
                     VStack(alignment: .leading, spacing: 16) {
                         benefitRow(icon: "rectangle.slash", text: "アプリ内のバナー広告を削除")
+                        benefitRow(icon: "checklist", text: "ホーム画面で今日の復習を確認")
                         benefitRow(icon: "heart.fill", text: "新機能の開発と継続的な改善を支援")
                         benefitRow(icon: "arrow.triangle.2.circlepath", text: "いつでもキャンセル可能")
                     }
