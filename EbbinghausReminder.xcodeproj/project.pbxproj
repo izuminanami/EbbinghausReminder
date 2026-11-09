@@ -18,6 +18,7 @@
 		B12235FB2D531C7C00320184 /* Exceptions for "EbbinghausReminder" folder in "EbbinghausReminder" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				EbbinghausReminder.storekit,
 				Info.plist,
 			);
 			target = B122358E2D52A29700320184 /* EbbinghausReminder */;

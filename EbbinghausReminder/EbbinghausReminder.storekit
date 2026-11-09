@@ -1,0 +1,67 @@
+{
+  "identifier" : "B7C7128E-86EF-47D8-A435-3C7B9112D433",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ja_JP",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "JPN",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "B1478942",
+      "localizations" : [
+        {
+          "description" : "広告を削除して、アプリの継続的な開発を支援します。",
+          "displayName" : "開発者サポーター",
+          "locale" : "ja"
+        }
+      ],
+      "name" : "開発者サポーター",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "240",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "B610C4A7",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "広告を削除して、これからの改善と運営を支援できます。",
+              "displayName" : "月額サポーター",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "7imuzi.EbbinghausReminder.support.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "月額サポーター",
+          "subscriptionGroupID" : "B1478942",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

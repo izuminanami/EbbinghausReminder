@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 struct EbbinghausReminderApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var taskManager = TaskManager()
+    @StateObject private var subscriptionStore = SupportSubscriptionStore()
 
     init() {
         // タブバーのデザインを変更
@@ -32,12 +33,14 @@ struct EbbinghausReminderApp: App {
         WindowGroup {
             AppRootView()
                 .environmentObject(taskManager)
+                .environmentObject(subscriptionStore)
         }
     }
 }
 
 private struct AppRootView: View {
     @EnvironmentObject private var taskManager: TaskManager
+    @EnvironmentObject private var subscriptionStore: SupportSubscriptionStore
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var isShowingOnboarding = false
     @State private var didEvaluateOnboarding = false
@@ -64,7 +67,11 @@ private struct AppRootView: View {
                         }
                 }
 
-                if didEvaluateOnboarding && !isShowingOnboarding && !Self.isStoreScreenshotMode {
+                if didEvaluateOnboarding
+                    && !isShowingOnboarding
+                    && !Self.isStoreScreenshotMode
+                    && subscriptionStore.hasCheckedEntitlement
+                    && !subscriptionStore.isSubscribed {
                     Divider()
                     AdMobBannerView(width: geometry.size.width)
                         .padding(.top, 4)
@@ -81,6 +88,9 @@ private struct AppRootView: View {
             .interactiveDismissDisabled()
         }
         .onAppear(perform: evaluateOnboarding)
+        .task {
+            await subscriptionStore.prepare()
+        }
     }
 
     private func evaluateOnboarding() {

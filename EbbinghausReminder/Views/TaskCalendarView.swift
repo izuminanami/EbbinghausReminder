@@ -2,9 +2,11 @@ import SwiftUI
 
 struct TaskCalendarView: View {
     @EnvironmentObject private var taskManager: TaskManager
+    @EnvironmentObject private var subscriptionStore: SupportSubscriptionStore
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
     @State private var isAddingTask = false
+    @State private var isShowingSupport = false
     @State private var editingTask: Task?
     @State private var completingTaskIDs: Set<UUID> = []
 
@@ -53,6 +55,10 @@ struct TaskCalendarView: View {
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(isPresented: $isShowingSupport) {
+            SupportDeveloperView()
+                .environmentObject(subscriptionStore)
+        }
     }
 
     private var header: some View {
@@ -61,6 +67,7 @@ struct TaskCalendarView: View {
                 .font(.title2.bold())
                 .foregroundColor(Color("PrimaryColor"))
             Spacer()
+            SupportSubscriptionButton(isPresented: $isShowingSupport)
             Button {
                 goToToday()
             } label: {

@@ -2,11 +2,13 @@ import SwiftUI
 
 struct TodayTaskView: View {
     @EnvironmentObject private var taskManager: TaskManager
+    @EnvironmentObject private var subscriptionStore: SupportSubscriptionStore
     @AppStorage("taskSortOption") private var sortOptionRawValue = TaskSortOption.scheduledDate.rawValue
 
     @State private var isAddingTask = false
     @State private var isShowingInfo = false
     @State private var isShowingSettings = false
+    @State private var isShowingSupport = false
     @State private var editingTask: Task?
     @State private var completingTaskIDs: Set<UUID> = []
 
@@ -63,6 +65,10 @@ struct TodayTaskView: View {
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(isPresented: $isShowingSupport) {
+            SupportDeveloperView()
+                .environmentObject(subscriptionStore)
+        }
     }
 
     private var header: some View {
@@ -71,6 +77,7 @@ struct TodayTaskView: View {
                 .font(.title2.bold())
                 .foregroundColor(Color("PrimaryColor"))
             Spacer()
+            SupportSubscriptionButton(isPresented: $isShowingSupport)
             Button { withAnimation { isShowingInfo = true } } label: {
                 Image(systemName: "info.circle")
             }
