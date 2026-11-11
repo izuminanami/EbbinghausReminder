@@ -37,6 +37,7 @@ private struct AdMobBannerRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> BannerView {
         let banner = BannerView(adSize: adSize)
+        banner.delegate = context.coordinator
 
         #if DEBUG
         banner.adUnitID = "ca-app-pub-3940256099942544/2934735716"
@@ -63,6 +64,9 @@ private struct AdMobBannerRepresentable: UIViewRepresentable {
         DispatchQueue.main.async {
             guard let rootViewController = UIApplication.shared.adRootViewController else {
                 coordinator.isLoading = false
+                AnalyticsService.shared.log("ad_banner_load_skipped", parameters: [
+                    "reason": "missing_root_view_controller"
+                ])
                 return
             }
             banner.rootViewController = rootViewController
@@ -73,16 +77,38 @@ private struct AdMobBannerRepresentable: UIViewRepresentable {
             }
 
             banner.load(Request())
+            AnalyticsService.shared.log("ad_banner_requested", parameters: [
+                "width_bucket": cgSize(for: banner.adSize).width < 500 ? "compact" : "wide"
+            ])
             coordinator.hasLoaded = true
             coordinator.isLoading = false
             coordinator.loadedAdSizeDescription = string(for: banner.adSize)
         }
     }
 
-    final class Coordinator {
+    final class Coordinator: NSObject, BannerViewDelegate {
         var hasLoaded = false
         var isLoading = false
         var loadedAdSizeDescription = ""
+
+        func bannerViewDidReceiveAd(_ bannerView: BannerView) {
+            AnalyticsService.shared.log("ad_banner_loaded")
+        }
+
+        func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
+            AnalyticsService.shared.record(error, context: "ad_banner_load")
+            AnalyticsService.shared.log("ad_banner_load_failed", parameters: [
+                "error_code": (error as NSError).code
+            ])
+        }
+
+        func bannerViewDidRecordImpression(_ bannerView: BannerView) {
+            AnalyticsService.shared.log("ad_impression", parameters: ["format": "banner"])
+        }
+
+        func bannerViewDidRecordClick(_ bannerView: BannerView) {
+            AnalyticsService.shared.log("ad_click", parameters: ["format": "banner"])
+        }
     }
 }
 

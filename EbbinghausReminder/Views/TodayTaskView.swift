@@ -41,7 +41,7 @@ struct TodayTaskView: View {
             }
 
             if isAddingTask {
-                TaskAddPopupView(isShowing: $isAddingTask)
+                TaskAddPopupView(isShowing: $isAddingTask, source: "today")
                     .transition(.opacity)
                     .zIndex(1)
             }
@@ -59,15 +59,21 @@ struct TodayTaskView: View {
             }
 
             if let task = editingTask {
-                TaskEditPopupView(task: task, isShowing: editingTaskBinding)
+                TaskEditPopupView(task: task, isShowing: editingTaskBinding, source: "today")
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(isPresented: $isShowingSupport) {
-            SupportDeveloperView()
+            SupportDeveloperView(source: "today")
                 .environmentObject(subscriptionStore)
+        }
+        .onChange(of: sortOptionRawValue) { _, newValue in
+            AnalyticsService.shared.log("task_sort_changed", parameters: [
+                "source": "today",
+                "sort": newValue
+            ])
         }
     }
 
@@ -77,14 +83,23 @@ struct TodayTaskView: View {
                 .font(.title2.bold())
                 .foregroundColor(Color("PrimaryColor"))
             Spacer()
-            SupportSubscriptionButton(isPresented: $isShowingSupport)
-            Button { withAnimation { isShowingInfo = true } } label: {
+            SupportSubscriptionButton(isPresented: $isShowingSupport, source: "today")
+            Button {
+                AnalyticsService.shared.log("info_opened", parameters: ["source": "today"])
+                withAnimation { isShowingInfo = true }
+            } label: {
                 Image(systemName: "info.circle")
             }
-            Button { withAnimation { isShowingSettings = true } } label: {
+            Button {
+                AnalyticsService.shared.log("settings_opened", parameters: ["source": "today"])
+                withAnimation { isShowingSettings = true }
+            } label: {
                 Image(systemName: "gearshape")
             }
-            Button { withAnimation { isAddingTask = true } } label: {
+            Button {
+                AnalyticsService.shared.log("task_add_button_tapped", parameters: ["source": "today"])
+                withAnimation { isAddingTask = true }
+            } label: {
                 Image(systemName: "plus.circle.fill")
             }
         }
@@ -180,7 +195,7 @@ struct TodayTaskView: View {
         }
         .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
-                taskManager.deleteTask(task)
+                taskManager.deleteTask(task, source: "today")
             } label: {
                 Label("削除", systemImage: "trash")
             }
@@ -221,7 +236,7 @@ struct TodayTaskView: View {
         completingTaskIDs.insert(task.id)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
             withAnimation(.easeInOut(duration: 0.25)) {
-                taskManager.completeTask(task)
+                taskManager.completeTask(task, source: "today")
                 completingTaskIDs.remove(task.id)
             }
         }

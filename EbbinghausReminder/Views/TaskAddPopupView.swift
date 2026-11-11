@@ -10,12 +10,14 @@ import SwiftUI
 struct TaskAddPopupView: View {
     @EnvironmentObject var taskManager: TaskManager
     @Binding var isShowing: Bool
+    let source: String
     @State private var taskTitle = ""
     @State private var taskDate: Date
 
-    init(isShowing: Binding<Bool>, initialDate: Date = Date()) {
+    init(isShowing: Binding<Bool>, initialDate: Date = Date(), source: String = "unknown") {
         _isShowing = isShowing
         _taskDate = State(initialValue: initialDate)
+        self.source = source
     }
 
     var body: some View {
@@ -78,12 +80,16 @@ struct TaskAddPopupView: View {
         .cornerRadius(12)
         .shadow(radius: 10)
         .transition(.opacity) // フェードイン・フェードアウト
+        .onAppear {
+            AnalyticsService.shared.screen("task_add")
+            AnalyticsService.shared.log("task_add_opened", parameters: ["source": source])
+        }
     }
 
     private func addTask() {
         let trimmedTitle = taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else { return }
-        taskManager.addTask(title: trimmedTitle, date: taskDate)
+        taskManager.addTask(title: trimmedTitle, date: taskDate, source: source)
         withAnimation { isShowing = false }
         taskTitle = "" // フォームをリセット
     }

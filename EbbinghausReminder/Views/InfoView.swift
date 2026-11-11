@@ -65,6 +65,9 @@ struct InfoView: View {
         .shadow(radius: 10)
         .transition(.opacity) // フェードイン・フェードアウトのアニメーション
         .zIndex(1) // 他のビューより前面に表示
+        .onAppear {
+            AnalyticsService.shared.screen("info")
+        }
     }
 }
 

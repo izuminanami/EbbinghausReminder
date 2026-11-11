@@ -4,12 +4,14 @@ struct TaskEditPopupView: View {
     @EnvironmentObject private var taskManager: TaskManager
     @Binding var isShowing: Bool
     let task: Task
+    let source: String
 
     @State private var taskTitle: String
     @State private var taskDate: Date
 
-    init(task: Task, isShowing: Binding<Bool>) {
+    init(task: Task, isShowing: Binding<Bool>, source: String = "unknown") {
         self.task = task
+        self.source = source
         _isShowing = isShowing
         _taskTitle = State(initialValue: task.title)
         _taskDate = State(initialValue: task.scheduledDate)
@@ -60,6 +62,13 @@ struct TaskEditPopupView: View {
         .background(Color("CardBackground"))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(radius: 10)
+        .onAppear {
+            AnalyticsService.shared.screen("task_edit")
+            AnalyticsService.shared.log("task_edit_opened", parameters: [
+                "source": source,
+                "review_number": task.completionCount + 1
+            ])
+        }
     }
 
     private var trimmedTitle: String {
@@ -68,7 +77,7 @@ struct TaskEditPopupView: View {
 
     private func save() {
         guard !trimmedTitle.isEmpty else { return }
-        taskManager.updateTask(task, title: trimmedTitle, date: taskDate)
+        taskManager.updateTask(task, title: trimmedTitle, date: taskDate, source: source)
         withAnimation { isShowing = false }
     }
 }

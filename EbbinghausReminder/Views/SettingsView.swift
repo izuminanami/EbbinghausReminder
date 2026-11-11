@@ -38,6 +38,7 @@ struct SettingsView: View {
                 if notificationStatus == .denied {
                     Button("設定を開く") {
                         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                        AnalyticsService.shared.log("system_notification_settings_opened")
                         UIApplication.shared.open(url)
                     }
                     .font(.subheadline.bold())
@@ -61,7 +62,7 @@ struct SettingsView: View {
                 .foregroundColor(Color("GrayTextColor"))
 
             Button("時刻を保存") {
-                taskManager.updateNotificationTime(to: notificationTime)
+                taskManager.updateNotificationTime(to: notificationTime, source: "settings")
                 withAnimation { isShowing = false }
             }
             .buttonStyle(.borderedProminent)
@@ -76,6 +77,7 @@ struct SettingsView: View {
         .onAppear {
             notificationTime = taskManager.preferredNotificationTime
             refreshNotificationStatus()
+            AnalyticsService.shared.screen("settings")
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {
@@ -127,7 +129,21 @@ struct SettingsView: View {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
                 notificationStatus = settings.authorizationStatus
+                let status = Self.analyticsStatus(settings.authorizationStatus)
+                AnalyticsService.shared.log("notification_status_viewed", parameters: ["status": status])
+                AnalyticsService.shared.setUserProperty(status, forName: "notification_status")
             }
+        }
+    }
+
+    private static func analyticsStatus(_ status: UNAuthorizationStatus) -> String {
+        switch status {
+        case .authorized: return "authorized"
+        case .provisional: return "provisional"
+        case .ephemeral: return "ephemeral"
+        case .denied: return "denied"
+        case .notDetermined: return "not_determined"
+        @unknown default: return "unknown"
         }
     }
 }

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B1DC0CB82DC3527000BF405C /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = B1DC0CB72DC3527000BF405C /* GoogleMobileAds */; };
+		B30000013070000100EBB001 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = B30000023070000100EBB001 /* FirebaseAnalytics */; };
+		B30000033070000100EBB001 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = B30000043070000100EBB001 /* FirebaseCrashlytics */; };
 		B20000013060000100EBB001 /* EbbinghausReminderWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B20000023060000100EBB001 /* EbbinghausReminderWidget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -82,6 +84,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B30000013070000100EBB001 /* FirebaseAnalytics in Frameworks */,
+				B30000033070000100EBB001 /* FirebaseCrashlytics in Frameworks */,
 				B1DC0CB82DC3527000BF405C /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -117,6 +121,7 @@
 				B122358C2D52A29700320184 /* Frameworks */,
 				B122358D2D52A29700320184 /* Resources */,
 				B200000C3060000100EBB001 /* Embed Foundation Extensions */,
+				B30000053070000100EBB001 /* Upload Crashlytics Symbols */,
 			);
 			buildRules = (
 			);
@@ -129,6 +134,8 @@
 			name = EbbinghausReminder;
 			packageProductDependencies = (
 				B1DC0CB72DC3527000BF405C /* GoogleMobileAds */,
+				B30000023070000100EBB001 /* FirebaseAnalytics */,
+				B30000043070000100EBB001 /* FirebaseCrashlytics */,
 			);
 			productName = EbbinghausReminder;
 			productReference = B1F9D2EE305FF39A0093DB46 /* EbbinghausReminder.app */;
@@ -185,6 +192,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				B1DC0CB62DC3509400BF405C /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				B30000063070000100EBB001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B12235862D52A29700320184;
@@ -213,6 +221,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B30000053070000100EBB001 /* Upload Crashlytics Symbols */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Upload Crashlytics Symbols";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" = \"Release\" ]; then\n  \"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B122358B2D52A29700320184 /* Sources */ = {
@@ -380,12 +411,16 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -419,12 +454,16 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -453,7 +492,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder.Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -481,7 +520,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "-7imuzi.EbbinghausReminder.Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -534,6 +573,14 @@
 				minimumVersion = 12.3.0;
 			};
 		};
+		B30000063070000100EBB001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.0.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -541,6 +588,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B1DC0CB62DC3509400BF405C /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
 			productName = GoogleMobileAds;
+		};
+		B30000023070000100EBB001 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B30000063070000100EBB001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		B30000043070000100EBB001 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B30000063070000100EBB001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

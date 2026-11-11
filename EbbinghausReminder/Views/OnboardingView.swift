@@ -13,6 +13,7 @@ struct OnboardingView: View {
                 Spacer()
                 if page < 2 {
                     Button("あとで") {
+                        AnalyticsService.shared.log("onboarding_skipped", parameters: ["page": page])
                         onFinish()
                     }
                     .foregroundColor(Color("GrayTextColor"))
@@ -43,6 +44,7 @@ struct OnboardingView: View {
 
             if page < 2 {
                 Button("次へ") {
+                    AnalyticsService.shared.log("onboarding_next_tapped", parameters: ["from_page": page])
                     withAnimation { page += 1 }
                 }
                 .buttonStyle(.borderedProminent)
@@ -52,7 +54,11 @@ struct OnboardingView: View {
             } else {
                 VStack(spacing: 12) {
                     Button("通知を設定して始める") {
-                        taskManager.updateNotificationTime(to: notificationTime)
+                        taskManager.updateNotificationTime(to: notificationTime, source: "onboarding")
+                        AnalyticsService.shared.log("onboarding_completed", parameters: [
+                            "notification_choice": "enabled"
+                        ])
+                        AnalyticsService.shared.setUserProperty("completed", forName: "onboarding_status")
                         onFinish()
                     }
                     .buttonStyle(.borderedProminent)
@@ -61,6 +67,10 @@ struct OnboardingView: View {
                     .frame(maxWidth: .infinity)
 
                     Button("通知なしで始める") {
+                        AnalyticsService.shared.log("onboarding_completed", parameters: [
+                            "notification_choice": "disabled"
+                        ])
+                        AnalyticsService.shared.setUserProperty("completed", forName: "onboarding_status")
                         onFinish()
                     }
                     .foregroundColor(Color("GrayTextColor"))
@@ -72,6 +82,11 @@ struct OnboardingView: View {
         .background(Color("BackgroundColor").ignoresSafeArea())
         .onAppear {
             notificationTime = taskManager.preferredNotificationTime
+            AnalyticsService.shared.screen("onboarding_1")
+        }
+        .onChange(of: page) { _, newPage in
+            AnalyticsService.shared.log("onboarding_page_viewed", parameters: ["page": newPage + 1])
+            AnalyticsService.shared.screen("onboarding_\(newPage + 1)")
         }
     }
 

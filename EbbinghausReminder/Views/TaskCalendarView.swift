@@ -43,20 +43,20 @@ struct TaskCalendarView: View {
             }
 
             if isAddingTask {
-                TaskAddPopupView(isShowing: $isAddingTask, initialDate: selectedDate)
+                TaskAddPopupView(isShowing: $isAddingTask, initialDate: selectedDate, source: "calendar")
                     .transition(.opacity)
                     .zIndex(1)
             }
 
             if let task = editingTask {
-                TaskEditPopupView(task: task, isShowing: editingTaskBinding)
+                TaskEditPopupView(task: task, isShowing: editingTaskBinding, source: "calendar")
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(isPresented: $isShowingSupport) {
-            SupportDeveloperView()
+            SupportDeveloperView(source: "calendar")
                 .environmentObject(subscriptionStore)
         }
     }
@@ -67,14 +67,17 @@ struct TaskCalendarView: View {
                 .font(.title2.bold())
                 .foregroundColor(Color("PrimaryColor"))
             Spacer()
-            SupportSubscriptionButton(isPresented: $isShowingSupport)
+            SupportSubscriptionButton(isPresented: $isShowingSupport, source: "calendar")
             Button {
                 goToToday()
             } label: {
                 Text("今日")
                     .font(.subheadline.bold())
             }
-            Button { withAnimation { isAddingTask = true } } label: {
+            Button {
+                AnalyticsService.shared.log("task_add_button_tapped", parameters: ["source": "calendar"])
+                withAnimation { isAddingTask = true }
+            } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
             }
@@ -132,6 +135,12 @@ struct TaskCalendarView: View {
         }
 
         return Button {
+            AnalyticsService.shared.log("calendar_date_selected", parameters: [
+                "day_bucket": AnalyticsService.dayOffsetBucket(
+                    AnalyticsService.dayOffset(from: date)
+                ),
+                "has_tasks": hasTasks
+            ])
             withAnimation(.easeInOut(duration: 0.15)) {
                 selectedDate = date
                 completingTaskIDs.removeAll()
@@ -211,7 +220,7 @@ struct TaskCalendarView: View {
                 }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
-                        taskManager.deleteTask(task)
+                        taskManager.deleteTask(task, source: "calendar")
                     } label: {
                         Label("削除", systemImage: "trash")
                     }
@@ -269,9 +278,13 @@ struct TaskCalendarView: View {
             selectedDate = firstDay
             completingTaskIDs.removeAll()
         }
+        AnalyticsService.shared.log("calendar_month_changed", parameters: [
+            "direction": value < 0 ? "previous" : "next"
+        ])
     }
 
     private func goToToday() {
+        AnalyticsService.shared.log("calendar_today_tapped")
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedDate = Date()
             displayedMonth = Date()
@@ -284,7 +297,7 @@ struct TaskCalendarView: View {
         completingTaskIDs.insert(task.id)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
             withAnimation(.easeInOut(duration: 0.25)) {
-                taskManager.completeTask(task)
+                taskManager.completeTask(task, source: "calendar")
                 completingTaskIDs.remove(task.id)
             }
         }

@@ -39,21 +39,32 @@ struct TaskExecutionView: View {
             }
 
             if isAddingTask {
-                TaskAddPopupView(isShowing: $isAddingTask)
+                TaskAddPopupView(isShowing: $isAddingTask, source: "task_list")
                     .transition(.opacity)
                     .zIndex(1)
             }
 
             if let task = editingTask {
-                TaskEditPopupView(task: task, isShowing: editingTaskBinding)
+                TaskEditPopupView(task: task, isShowing: editingTaskBinding, source: "task_list")
                     .transition(.opacity)
                     .zIndex(1)
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(isPresented: $isShowingSupport) {
-            SupportDeveloperView()
+            SupportDeveloperView(source: "task_list")
                 .environmentObject(subscriptionStore)
+        }
+        .onChange(of: sortOptionRawValue) { _, newValue in
+            AnalyticsService.shared.log("task_sort_changed", parameters: [
+                "source": "task_list",
+                "sort": newValue
+            ])
+        }
+        .onChange(of: isShowingCompleted) { _, isCompleted in
+            AnalyticsService.shared.log("task_list_filter_changed", parameters: [
+                "filter": isCompleted ? "completed" : "active"
+            ])
         }
     }
 
@@ -82,8 +93,11 @@ struct TaskExecutionView: View {
 
             Spacer()
 
-            SupportSubscriptionButton(isPresented: $isShowingSupport)
-            Button { withAnimation { isAddingTask = true } } label: {
+            SupportSubscriptionButton(isPresented: $isShowingSupport, source: "task_list")
+            Button {
+                AnalyticsService.shared.log("task_add_button_tapped", parameters: ["source": "task_list"])
+                withAnimation { isAddingTask = true }
+            } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
                     .foregroundColor(Color("PrimaryColor"))
@@ -144,7 +158,7 @@ struct TaskExecutionView: View {
                 }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
-                        taskManager.deleteTask(task)
+                        taskManager.deleteTask(task, source: "task_list")
                     } label: {
                         Label("削除", systemImage: "trash")
                     }
