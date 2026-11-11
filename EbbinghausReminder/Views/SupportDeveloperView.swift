@@ -2,8 +2,16 @@ import StoreKit
 import SwiftUI
 
 struct SupportDeveloperView: View {
+    private static let privacyPolicyURL = URL(string: "https://izumi73.hp.peraichi.com/")!
+    private static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subscriptionStore: SupportSubscriptionStore
+    let source: String
+
+    init(source: String = "unknown") {
+        self.source = source
+    }
 
     var body: some View {
         NavigationStack {
@@ -41,8 +49,11 @@ struct SupportDeveloperView: View {
                         .foregroundColor(Color("GrayTextColor"))
                         .multilineTextAlignment(.center)
 
-                    Link("利用規約", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                        .font(.footnote)
+                    HStack(spacing: 20) {
+                        Link("プライバシーポリシー", destination: Self.privacyPolicyURL)
+                        Link("利用規約", destination: Self.termsOfUseURL)
+                    }
+                    .font(.footnote)
                 }
                 .padding(20)
             }
@@ -56,6 +67,11 @@ struct SupportDeveloperView: View {
             }
         }
         .task {
+            AnalyticsService.shared.screen("support_paywall")
+            AnalyticsService.shared.log("support_paywall_viewed", parameters: [
+                "source": source,
+                "is_subscribed": subscriptionStore.isSubscribed
+            ])
             if subscriptionStore.loadState == .idle {
                 await subscriptionStore.prepare()
             }
@@ -79,6 +95,15 @@ struct SupportDeveloperView: View {
             case .loaded:
                 if let product = subscriptionStore.product {
                     VStack(spacing: 12) {
+                        VStack(spacing: 4) {
+                            Text(product.displayName)
+                                .font(.headline)
+                                .foregroundColor(Color("TextColor"))
+                            Text("1か月ごとの自動更新 • \(product.displayPrice)")
+                                .font(.subheadline)
+                                .foregroundColor(Color("GrayTextColor"))
+                        }
+
                         Button {
                             _Concurrency.Task { await subscriptionStore.purchase() }
                         } label: {
@@ -143,10 +168,12 @@ struct SupportDeveloperView: View {
 struct SupportSubscriptionButton: View {
     @EnvironmentObject private var subscriptionStore: SupportSubscriptionStore
     @Binding var isPresented: Bool
+    let source: String
 
     var body: some View {
         if !subscriptionStore.isSubscribed {
             Button {
+                AnalyticsService.shared.log("support_button_tapped", parameters: ["source": source])
                 isPresented = true
             } label: {
                 Image(systemName: "crown")
