@@ -2,7 +2,7 @@ import StoreKit
 import SwiftUI
 
 struct SupportDeveloperView: View {
-    private static let privacyPolicyURL = URL(string: "https://izumi73.hp.peraichi.com/")!
+    private static let privacyPolicyURL = URL(string: "https://izuminanami.github.io/EbbinghausReminder/privacy-policy/")!
     private static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
     @Environment(\.dismiss) private var dismiss
