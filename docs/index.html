@@ -3,20 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#007aff">
   <title>おまかせエビングハウスくん</title>
-  <meta name="description" content="おまかせエビングハウスくんの公式情報ページです。">
-  <style>
-    :root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; }
-    body { max-width: 760px; margin: 0 auto; padding: 48px 24px; line-height: 1.75; }
-    h1 { line-height: 1.3; }
-    a { color: #3478f6; }
-  </style>
+  <meta name="description" content="忘れる前に、ちょうどいい復習を。おまかせエビングハウスくんの公式サイトです。">
+  <link rel="icon" href="https://raw.githubusercontent.com/izuminanami/EbbinghausReminder/main/icon_light.png">
+  <link rel="stylesheet" href="./assets/styles.css">
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="おまかせエビングハウスくん ホーム">
+      <img src="https://raw.githubusercontent.com/izuminanami/EbbinghausReminder/main/icon_light.png" alt="" width="40" height="40">
+      <span>おまかせエビングハウスくん</span>
+    </a>
+    <nav aria-label="メインナビゲーション">
+      <a href="./privacy-policy/">プライバシーポリシー</a>
+    </nav>
+  </header>
+
   <main>
-    <h1>おまかせエビングハウスくん</h1>
-    <p>エビングハウスの忘却曲線に基づいて、復習のタイミングをお知らせする学習支援アプリです。</p>
-    <p><a href="./privacy-policy/">プライバシーポリシー</a></p>
+    <section class="hero home-hero">
+      <div>
+        <p class="eyebrow">復習リマインダー</p>
+        <h1>忘れる前に、<br>ちょうどいい復習を。</h1>
+        <p class="lead">エビングハウスの忘却曲線に基づいて、学んだ内容を復習するタイミングをシンプルにお知らせします。</p>
+        <a class="button" href="./privacy-policy/">プライバシーポリシーを見る</a>
+      </div>
+      <div class="app-mark" aria-hidden="true">
+        <img src="https://raw.githubusercontent.com/izuminanami/EbbinghausReminder/main/icon_light.png" alt="">
+      </div>
+    </section>
+
+    <section class="feature-grid" aria-label="主な特徴">
+      <article class="feature-card">
+        <span class="feature-icon">✓</span>
+        <h2>かんたん登録</h2>
+        <p>覚えたい内容を登録するだけ。複雑な設定は必要ありません。</p>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon">↻</span>
+        <h2>復習を自動管理</h2>
+        <p>1日後、1週間後、1か月後の復習サイクルをアプリが管理します。</p>
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon">◷</span>
+        <h2>通知でお知らせ</h2>
+        <p>自分で設定した時刻に、今日取り組む復習をお知らせします。</p>
+      </article>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <span>© 2026 おまかせエビングハウスくん</span>
+    <a href="./privacy-policy/">プライバシーポリシー</a>
+  </footer>
 </body>
 </html>
